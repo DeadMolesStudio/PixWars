@@ -1,5 +1,11 @@
 #include "qpix.h"
 
+Qpix::Qpix(QObject *parent) :
+    QObject(parent), PixelClient(0)
+{
+}
+
+
 Qpix::Qpix(unsigned int id, QObject *parent) :
     QObject(parent), PixelClient(id)
 {

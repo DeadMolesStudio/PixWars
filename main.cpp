@@ -1,22 +1,22 @@
-#include <QCoreApplication>
-#include <iostream>
-#include "pixel.h"
-#include <qpix.h>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include "pixeltable.h"
+
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    PixelClient p(3);
-    p.setStrColor("blue");
-    p.printPixel();
-    std::cout << "poka" << std::endl;
+    QGuiApplication app(argc, argv);
 
-    Qpix pp(8);
+    qmlRegisterType<PixelTable>("pixel_model", 1, 0, "QPixelTable");
+    qmlRegisterType<Qpix>("pixel_model", 1, 0, "QPixel");
 
-    QString s = "red";
-    pp.setQpix(s);
-    pp.printPixel();
+    QQmlApplicationEngine engine;
 
-    return a.exec();
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    if (engine.rootObjects().isEmpty())
+        return -1;
+
+    return app.exec();
 }
