@@ -12,9 +12,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    pixel.cpp \
+    pixeltable.cpp \
+    qpix.cpp \
+    time_date.cpp
 
-RESOURCES += qml.qrc
+RESOURCES += qml.qrc \
+    qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -28,4 +33,18 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    download_img.png
+    download_img.png \
+    pixwars.pro.user \
+    main.qml.autosave \
+    qtquickcontrols2.conf \
+    main.qml
+
+SUBDIRS += \
+    pixwars.pro
+
+HEADERS += \
+    pixel.h \
+    pixeltable.h \
+    qpix.h \
+    qpix.h.autosave \
+    time_date.h

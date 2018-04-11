@@ -6,6 +6,10 @@ PixelTable::PixelTable(QObject *parent) :
 //    Qpix *pix = new Qpix(id,this);
 //    pix->setProperty("color", "white");
 //    listPixels << pix;
+    for( int i = 0; i < 729; i++)
+    {
+        add(i);
+    }
 }
 
 QQmlListProperty<Qpix> PixelTable::data()
@@ -19,7 +23,11 @@ QQmlListProperty<Qpix> PixelTable::data()
 void PixelTable::add(unsigned int id)
 {
     Qpix *pix = new Qpix(id,this);
-    pix->setProperty("color", "white");
+    if (id%2 == 0)
+        pix->setProperty("color", "red");
+    else
+        pix->setProperty("color", "white");
+
     listPixels.append(pix);
 
     emit dataChanged();

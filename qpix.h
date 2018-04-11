@@ -9,15 +9,19 @@ class Qpix : public QObject, public PixelClient
 {
     Q_OBJECT
     Q_PROPERTY(QString color READ getQColor WRITE setQpix NOTIFY colorChanged)
+    Q_PROPERTY(bool blocked READ pixBlocked NOTIFY blockedChanged) //какое notify
+    //Q_PROPERTY(unsigned int id READ id WRITE setId NOTIFY idChanged)
 public:
     Qpix(QObject *parent = nullptr);
     explicit Qpix(unsigned int id, QObject *parent = nullptr);
 
     void setQpix(const QString new_color);
     QString getQColor();
+    QString UnblockIn();
 
 signals:
     void colorChanged(QString color);
+    void blockedChanged(bool blocked);
 
 public slots:
 

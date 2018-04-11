@@ -25,3 +25,10 @@ QString Qpix::getQColor()
     return qcol;
 }
 
+QString Qpix::UnblockIn()
+{
+    std::string str = PixelClient::leftTime();
+    QString qstr = QString::fromStdString(str);
+    return qstr;
+}
+

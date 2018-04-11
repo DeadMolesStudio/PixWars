@@ -88,6 +88,14 @@ std::string PixelClient::getStrColor() const
     return list_color[color];
 }
 
+bool PixelClient::pixBlocked() const
+{
+    time_t rest = get_difference(unlock_time);
+    if ( rest == time(NULL) )
+        return true;
+    return false;
+}
+
 void PixelClient::setUnlockTime(const time_t time)
 {
     if ( time == unlock_time )
@@ -114,7 +122,7 @@ std::string PixelClient::leftTime() const
 {
     time_t rest = get_difference(unlock_time);
     if ( rest == time(NULL) )
-        return "пиксель уже разблокирован";
+        return "0";
 
     std::string min = std::to_string(rest / 60);
     std::string sec = std::to_string(rest % 60);

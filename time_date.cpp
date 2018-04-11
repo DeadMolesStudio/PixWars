@@ -35,7 +35,7 @@ time_t get_difference(time_t t)
     time(&now);
 
     if ( now > t )
-        return NULL;
+        return time(NULL);
     return t - now;
 }
 
