@@ -15,16 +15,18 @@ public:
     Qpix(QObject *parent = nullptr);
     explicit Qpix(unsigned int id, QObject *parent = nullptr);
 
-    void setQpix(const QString new_color);
+    void blockQpix();
     QString getQColor();
     QString UnblockIn();
+    void setQpix(const QString new_color);
+
 
 signals:
     void colorChanged(QString color);
     void blockedChanged(bool blocked);
 
 public slots:
-
+    Q_INVOKABLE void setQpix1(const QString new_color);
 };
 
 #endif // QPIX_H

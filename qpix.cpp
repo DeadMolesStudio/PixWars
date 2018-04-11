@@ -14,8 +14,22 @@ Qpix::Qpix(unsigned int id, QObject *parent) :
 
 void Qpix::setQpix(const QString new_color)
 {
-    PixelClient::setUnlockTime();
     PixelClient::setStrColor(new_color.toStdString());
+    blockQpix();
+    emit colorChanged(new_color);
+}
+
+void Qpix::setQpix1(const QString new_color)
+{
+    PixelClient::setStrColor(new_color.toStdString());
+    blockQpix();
+    emit colorChanged(new_color);
+}
+
+void Qpix::blockQpix()
+{
+    PixelClient::setUnlockTime();
+    emit blockedChanged(PixelClient::pixBlocked());
 }
 
 QString Qpix::getQColor()

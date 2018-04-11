@@ -2,7 +2,7 @@
 
 std::vector<std::string> list_color
         {
-                "white", "red", "blue", "green", "black", "pink", "yellow"
+                "white", "red", "blue", "green", "black", "pink", "yellow", "cyan"
         };
 
 

@@ -1,7 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include "pixeltable.h"
-#include "testpix.h"
 
 
 int main(int argc, char *argv[])
@@ -12,7 +11,6 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<PixelTable>("pixel_model", 1, 0, "QPixelTable");
     qmlRegisterType<Qpix>("pixel_model", 1, 0, "QPixel");
-    qmlRegisterType<testPix>("pixel_model", 1, 0, "QTestPix");
 
     QQmlApplicationEngine engine;
 

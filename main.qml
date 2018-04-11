@@ -39,7 +39,7 @@ ApplicationWindow {
                 anchors.fill: parent
                 cellWidth: app.width / 20
                 cellHeight: grid.cellWidth
-                contentWidth: Math.sqrt(729) * grid.cellWidth
+                contentWidth: Math.sqrt(dataModel.count) * grid.cellWidth
                 contentHeight: grid.width
                 interactive: true
                 clip: true
@@ -53,6 +53,7 @@ ApplicationWindow {
                        property var view: GridView.view
                        property var isCurrent: GridView.isCurrentItem
                        property var rect: rect
+                    id: gridItem
                        clip: true
                        height: grid.cellHeight
                        width: grid.cellWidth
@@ -70,11 +71,11 @@ ApplicationWindow {
                                width: 0
                            }
 
-                           Text {
-                               id: name
-                               text: model.index
-                               color: "black"
-                           }
+//                           Text {
+//                               id: name
+//                               text: model.index
+//                               color: "black"
+//                           }
 
 
 
@@ -115,8 +116,10 @@ ApplicationWindow {
                                    y: (app.height - popup.height) / 2
                                    modal: true
                                    focus: true
+
+
                                    GridView{
-                                       model: ["#700000", "#e6e6ae", "#007000", "#123456", "#bb77ff", "#708090", "#700000", "#e6e6ae", "#007000", "#123456", "#bb77ff", "#708090", "#007000", "#700000", "#e6e6ae", "#007000"]
+                                       model: ["white", "red", "blue", "green", "black", "pink", "yellow", "cyan","white", "red", "blue", "green", "black", "pink", "yellow", "cyan"]
                                        anchors.fill: parent
                                        cellHeight: 30
                                        cellWidth: 30
@@ -133,14 +136,17 @@ ApplicationWindow {
                                                height: 30
                                                border {
                                                   width: 1
-                                                  color: "white"
+                                                  color: "lightgrey"
                                                }
                                            }
                                            MouseArea {
                                                    onClicked: paint()
                                                    anchors.fill: parent
                                                    function paint() {
+                                                       //rect.model.color = modelData
+
                                                        rect.color = modelData
+                                                       //gridItem.setQpix1(modelData)
                                                        popup.close()
 
                                                    }

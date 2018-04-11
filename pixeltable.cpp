@@ -23,10 +23,12 @@ QQmlListProperty<Qpix> PixelTable::data()
 void PixelTable::add(unsigned int id)
 {
     Qpix *pix = new Qpix(id,this);
+    QString col = pix->getQColor();
+
     if (id%2 == 0)
-        pix->setProperty("color", "red");
+        pix->setProperty("color", col);
     else
-        pix->setProperty("color", "white");
+        pix->setProperty("color", col);
 
     listPixels.append(pix);
 
@@ -59,6 +61,11 @@ Qpix *PixelTable::atData(QQmlListProperty<Qpix> *list, int index)
     return data->at(index);
 }
 
+
+int PixelTable::count() const
+{
+    return listPixels.size();
+}
 
 
 
