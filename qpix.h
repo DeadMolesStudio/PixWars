@@ -26,7 +26,7 @@ signals:
     void blockedChanged(bool blocked);
 
 public slots:
-    Q_INVOKABLE void setQpix1(const QString new_color);
+
 };
 
 #endif // QPIX_H

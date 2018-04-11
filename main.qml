@@ -53,10 +53,11 @@ ApplicationWindow {
                        property var view: GridView.view
                        property var isCurrent: GridView.isCurrentItem
                        property var rect: rect
-                    id: gridItem
+                       id: gridItem
                        clip: true
                        height: grid.cellHeight
                        width: grid.cellWidth
+
 
 
                        Rectangle {
@@ -71,11 +72,11 @@ ApplicationWindow {
                                width: 0
                            }
 
-//                           Text {
-//                               id: name
-//                               text: model.index
-//                               color: "black"
-//                           }
+                           Text {
+                               id: name
+                               text: model.index
+                               color: "black"
+                           }
 
 
 
@@ -143,10 +144,8 @@ ApplicationWindow {
                                                    onClicked: paint()
                                                    anchors.fill: parent
                                                    function paint() {
-                                                       //rect.model.color = modelData
-
-                                                       rect.color = modelData
-                                                       //gridItem.setQpix1(modelData)
+                                                       //rect.color = modelData
+                                                       dataModel.setQpixById(grid.currentIndex, modelData)
                                                        popup.close()
 
                                                    }
@@ -154,44 +153,8 @@ ApplicationWindow {
                                        }
                                    }
 
-////                                   ComboBox{
-////                                       id: colorSelector
-////                                       anchors.top: parent.top
-////                                       model: ["#700000", "#e6e6ae", "#007000", "#123456", "#bb77ff", "#708090"]
-
-
-////                                       delegate: ItemDelegate {
-////                                           id: colorItem
-////                                           height: 30
-////                                           width: colorSelector.width
-////                                           Rectangle {
-////                                               anchors.left: parent.left
-////                                               color: modelData
-////                                               width: 30
-////                                               height: 30
-////                                           }
-////                                           MouseArea {
-////                                                   onClicked: colorSelector.popup.close()
-////                                           }
-////                                       }
-
-////                                   }
-////                                   Button {
-////                                       anchors.bottom: parent.bottom
-////                                       text: "Paint!"
-////                                       onClicked: paint()
-
-////                                       function paint() {
-////                                           popup.close()
-////                                       }
-////                                   }
-
-
-
                                }
-
                        }
-
 
                    }
 

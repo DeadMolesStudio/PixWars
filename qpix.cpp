@@ -1,4 +1,5 @@
 #include "qpix.h"
+#include "QDebug"
 
 Qpix::Qpix(QObject *parent) :
     QObject(parent), PixelClient(0)
@@ -16,13 +17,7 @@ void Qpix::setQpix(const QString new_color)
 {
     PixelClient::setStrColor(new_color.toStdString());
     blockQpix();
-    emit colorChanged(new_color);
-}
 
-void Qpix::setQpix1(const QString new_color)
-{
-    PixelClient::setStrColor(new_color.toStdString());
-    blockQpix();
     emit colorChanged(new_color);
 }
 
