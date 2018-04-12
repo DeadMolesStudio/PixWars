@@ -65,6 +65,7 @@ int PixelTable::count() const
 
 void PixelTable::setQpixById(unsigned int id, const QString new_color)
 {
+    std::cout << "void PixelTable::setQpixById" << std::endl;
     listPixels.at(id)->setQpix(new_color);
 }
 

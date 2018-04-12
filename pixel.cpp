@@ -93,18 +93,12 @@ bool PixelClient::pixBlocked() const
     time_t now;
     time(&now);
 
-     std:: cout << "PixelClient::pixBlocked()   ";
+    //std:: cout << "PixelClient::pixBlocked()   ";
     time_t rest = get_difference(unlock_time);
-    std::cout << std::endl << "REST IS " << rest << std::endl;
+    //std::cout << std::endl << "REST IS " << rest << std::endl;
     if ( rest == time(NULL) )
-        std::cout <<">>>>>>>>>>>>>>>>>>> true" << std::endl;
-    else
-      std::cout <<">>>>>>>>>>>>>>>>>>> false" << std::endl;
-
-
-    if ( rest == time(NULL) )
-        return true;
-    return false;
+        return false;
+    return true;
 }
 
 void PixelClient::setUnlockTime(const time_t time)
@@ -119,7 +113,6 @@ void PixelClient::setUnlockTime()
     time_t now;
     time(&now);
     unlock_time = get_block_time(now);
-    std::cout << " PixelClient::setUnlockTime()  ---- " << get_time(unlock_time) << std::endl;
 }
 
 void PixelClient::setStrColor(const std::string new_color)

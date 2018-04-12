@@ -72,18 +72,18 @@ ApplicationWindow {
                                width: 0
                            }
 
-                           Text {
-                               id: name
-                               text: model.index
-                               color: "black"
-                           }
+//                           Text {
+//                               id: name
+//                               text: model.index
+//                               color: "black"
+//                           }
 
 
 
 
                            MouseArea {
                                anchors.fill: parent
-                               onClicked: blocked ? myAlert() : selected()
+                               onClicked: model.blocked ? myAlert() : selected()
 
                                function myAlert(){
                                    messageDialog.visible = true
