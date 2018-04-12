@@ -86,6 +86,7 @@ ApplicationWindow {
                                onClicked: model.blocked ? myAlert() : selected()
 
                                function myAlert(){
+                                   messageDialog.text = "Pixel unblocks in " + dataModel.unblockQpixIn(model.index)
                                    messageDialog.visible = true
                                }
 
@@ -96,18 +97,20 @@ ApplicationWindow {
                                    rect.border.color = "grey"
                                    popup.open()
                                }
-                           }
 
+                               MessageDialog {
+                                   id: messageDialog
+                                   title: "Pixel is blocked now"
+                                   onAccepted: {
 
-                           MessageDialog {
-                               id: messageDialog
-                               title: "Pixel is blocked now"
-                               text: "This pixel is blocked now. Try again in few minutes."
-                               onAccepted: {
-
+                                   }
+                                   visible: false
                                }
-                               visible: false
                            }
+
+
+
+
                            Popup {
                                    id: popup
                                    parent: overlay

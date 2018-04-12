@@ -127,8 +127,8 @@ std::string PixelClient::leftTime() const
 {
     time_t rest = get_difference(unlock_time);
     if ( rest == time(NULL) )
-        return "0";
-
+        return "почему 0";
+    std::cout << "  PixelClient::leftTime()     " << rest << std::endl;
     std::string min = std::to_string(rest / 60);
     std::string sec = std::to_string(rest % 60);
 

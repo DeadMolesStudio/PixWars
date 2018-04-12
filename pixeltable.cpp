@@ -26,6 +26,7 @@ void PixelTable::add(unsigned int id)
     QString col = pix->getQColor();
     pix->setProperty("color", col);
     pix->setProperty("blocked", false);
+    //pix->setProperty("time","разблокировано");
     listPixels.append(pix);
 
     emit dataChanged();
@@ -69,6 +70,10 @@ void PixelTable::setQpixById(unsigned int id, const QString new_color)
     listPixels.at(id)->setQpix(new_color);
 }
 
+QString PixelTable::unblockQpixIn(unsigned int id)
+{
+    return listPixels.at(id)->UnblockIn();
+}
 
 
 
