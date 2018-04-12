@@ -9,7 +9,7 @@ class PixelTable : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<Qpix> data READ data NOTIFY dataChanged)
-    Q_PROPERTY(int count READ count)
+    Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_CLASSINFO("DefaultProperty", "data")
 public:
     PixelTable(QObject *parent = nullptr);
@@ -24,6 +24,7 @@ public:
 
 signals:
     void dataChanged();
+    void countChanged();
 
 public slots:
 
