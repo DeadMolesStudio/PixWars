@@ -25,7 +25,7 @@ ApplicationWindow {
             width: app.width
             height: app.height
             contentWidth: Math.sqrt(dataModel.count) * grid.cellWidth
-            contentHeight: contentWidth
+            contentHeight: grid.contentHeight
             clip: true
             flickableDirection: Flickable.HorizontalAndVerticalFlick
             interactive: true
@@ -45,7 +45,7 @@ ApplicationWindow {
                     interactive: false
                     clip: true
                     flickableDirection: Flickable.HorizontalAndVerticalFlick
-                    cacheBuffer: 0
+                    cacheBuffer: 1000000
                     boundsBehavior: Flickable.DragAndOvershootBounds
 
 
