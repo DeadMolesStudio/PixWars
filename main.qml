@@ -20,32 +20,33 @@ ApplicationWindow {
         id: dataModel
     }
 
-    Rectangle {
-        id: flicker
-        width: grid.contentWidth
-        height: grid.contentHeight
-        clip: true
-        Rectangle {
-            id: background
-            anchors.fill: parent
-            color: "grey"
-        }
-
-            GridView {
-                id: grid
-                model: dataModel.data
-                width: app.width
-                height: app.height
+    Flickable {
+            id: flicker
+            width: app.width
+            height: app.height
+            contentWidth: Math.sqrt(dataModel.count) * grid.cellWidth
+            contentHeight: contentWidth
+            clip: true
+            flickableDirection: Flickable.HorizontalAndVerticalFlick
+            interactive: true
+            onContentYChanged: grid.contentY = contentY
+            Rectangle {
+                id: background
                 anchors.fill: parent
-                cellWidth: app.width / 20
-                cellHeight: grid.cellWidth
-                contentWidth: Math.sqrt(dataModel.count) * grid.cellWidth
-                contentHeight: grid.width
-                interactive: true
-                clip: true
-                flickableDirection: Flickable.HorizontalAndVerticalFlick
-                cacheBuffer: 0
-                boundsBehavior: Flickable.DragAndOvershootBounds
+                color: "grey"
+            }
+
+                GridView {
+                    id: grid
+                    model: dataModel.data
+                    anchors.fill: parent
+                    cellWidth: app.width / 20
+                    cellHeight: grid.cellWidth
+                    interactive: false
+                    clip: true
+                    flickableDirection: Flickable.HorizontalAndVerticalFlick
+                    cacheBuffer: 0
+                    boundsBehavior: Flickable.DragAndOvershootBounds
 
 
 
