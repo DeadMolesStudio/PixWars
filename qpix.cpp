@@ -15,6 +15,7 @@ Qpix::Qpix(unsigned int id, QObject *parent) :
 
 void Qpix::setQpix(const QString new_color)
 {
+    std::cout << "  22  Qpix::setQpix(" << std::endl;
     PixelClient::setStrColor(new_color.toStdString());
     blockQpix();
 
@@ -40,4 +41,18 @@ QString Qpix::UnblockIn()
     QString qstr = QString::fromStdString(str);
     return qstr;
 }
+
+void Qpix::setBlock(bool block)
+{
+
+    emit blockedChanged(block);
+}
+
+
+void Qpix::setQCol(QString new_color)
+{
+        PixelClient::setStrColor(new_color.toStdString());
+        emit colorChanged(new_color);
+}
+
 

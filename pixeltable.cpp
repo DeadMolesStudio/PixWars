@@ -24,12 +24,8 @@ void PixelTable::add(unsigned int id)
 {
     Qpix *pix = new Qpix(id,this);
     QString col = pix->getQColor();
-
-    if (id%2 == 0)
-        pix->setProperty("color", col);
-    else
-        pix->setProperty("color", col);
-
+    pix->setProperty("color", col);
+    pix->setProperty("blocked", false);
     listPixels.append(pix);
 
     emit dataChanged();
