@@ -7,8 +7,8 @@ import pixel_model 1.0
 ApplicationWindow {
     id: app
     visible: true
-    width: 640
-    height: 480
+    width: Screen.width
+    height: Screen.height
     title: "KEK"
     minimumWidth: width
     maximumWidth: width
