@@ -34,8 +34,10 @@ time_t get_difference(time_t t)
     time_t now;
     time(&now);
 
-    if ( now > t )
-        return NULL;
+   // std::cout << "now is    "<< get_time(now) << "      un is" << get_time(t);
+
+    if ( now >= t )
+        return time(NULL);
     return t - now;
 }
 

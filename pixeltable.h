@@ -9,6 +9,7 @@ class PixelTable : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<Qpix> data READ data NOTIFY dataChanged)
+    Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_CLASSINFO("DefaultProperty", "data")
 public:
     PixelTable(QObject *parent = nullptr);
@@ -16,9 +17,14 @@ public:
     QQmlListProperty<Qpix> data();
 
     Q_INVOKABLE void add(unsigned int id);
+    Q_INVOKABLE void setQpixById(unsigned int id, const QString new_color);
+    Q_INVOKABLE QString unblockQpixIn(unsigned int id);
+
+    int count() const;
 
 signals:
     void dataChanged();
+    void countChanged();
 
 public slots:
 

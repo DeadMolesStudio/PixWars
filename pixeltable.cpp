@@ -6,6 +6,10 @@ PixelTable::PixelTable(QObject *parent) :
 //    Qpix *pix = new Qpix(id,this);
 //    pix->setProperty("color", "white");
 //    listPixels << pix;
+    for( int i = 0; i < 729; i++)
+    {
+        add(i);
+    }
 }
 
 QQmlListProperty<Qpix> PixelTable::data()
@@ -19,7 +23,10 @@ QQmlListProperty<Qpix> PixelTable::data()
 void PixelTable::add(unsigned int id)
 {
     Qpix *pix = new Qpix(id,this);
-    pix->setProperty("color", "white");
+    QString col = pix->getQColor();
+    pix->setProperty("color", col);
+    pix->setProperty("blocked", false);
+    //pix->setProperty("time","разблокировано");
     listPixels.append(pix);
 
     emit dataChanged();
@@ -52,6 +59,21 @@ Qpix *PixelTable::atData(QQmlListProperty<Qpix> *list, int index)
 }
 
 
+int PixelTable::count() const
+{
+    return listPixels.size();
+}
+
+void PixelTable::setQpixById(unsigned int id, const QString new_color)
+{
+    std::cout << "void PixelTable::setQpixById" << std::endl;
+    listPixels.at(id)->setQpix(new_color);
+}
+
+QString PixelTable::unblockQpixIn(unsigned int id)
+{
+    return listPixels.at(id)->UnblockIn();
+}
 
 
 

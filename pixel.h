@@ -55,6 +55,7 @@ public:
 
     time_t getUnlockTime() const;
     std::string getStrColor() const;
+    bool pixBlocked() const;
 
     void setUnlockTime();
     void setUnlockTime(const time_t time); 
