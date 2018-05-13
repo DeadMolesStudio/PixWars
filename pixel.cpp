@@ -119,8 +119,28 @@ void PixelClient::setStrColor(const std::string new_color)
 {
     if ( new_color == list_color[color] )
         return;
-    std::vector<std::string>::iterator it = std::find(list_color.begin(),list_color.end(), new_color);
-    color = std::distance(list_color.begin(), it);
+    for(int i = 0; i < list_color.size(); i++)
+    {
+        if(list_color[i] == new_color)
+        {
+            color = i;
+            return;
+        }
+    }
+//    std::vector<std::string>::iterator it = std::find(list_color.begin(),list_color.end(), new_color);
+//    color = std::distance(list_color.begin(), it);
+}
+
+#include <sstream>
+
+namespace patch
+{
+    template < typename T > std::string to_string( const T& n )
+    {
+        std::ostringstream stm ;
+        stm << n ;
+        return stm.str() ;
+    }
 }
 
 std::string PixelClient::leftTime() const
@@ -129,8 +149,10 @@ std::string PixelClient::leftTime() const
     if ( rest == time(NULL) )
         return "почему 0";
     std::cout << "  PixelClient::leftTime()     " << rest << std::endl;
-    std::string min = std::to_string(rest / 60);
-    std::string sec = std::to_string(rest % 60);
+    std::string min = patch::to_string(rest / 60);
+    std::string sec = patch::to_string(rest % 60);
+//    std::string min = rest / 60;
+//    std::string sec = rest % 60;
 
     return min + ":" + sec;
 }
