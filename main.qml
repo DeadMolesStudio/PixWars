@@ -3,13 +3,14 @@ import QtQuick.Controls 2.2
 import QtQuick.Window 2.3
 import QtQuick.Dialogs 1.2
 import pixel_model 1.0
+import 'view_config.js' as Config
 
 ApplicationWindow {
     id: app
     visible: true
     width: Screen.width
     height: Screen.height
-    title: "KEK"
+    title: Config.title
     minimumWidth: width
     maximumWidth: width
     minimumHeight: height
@@ -40,12 +41,12 @@ ApplicationWindow {
             id: grid
             model: dataModel.data
             anchors.fill: parent
-            cellWidth: app.width / 20
+            cellWidth: app.width / Config.num_pixels_width
             cellHeight: grid.cellWidth
             interactive: false
             clip: true
             flickableDirection: Flickable.HorizontalAndVerticalFlick
-            cacheBuffer: 1000000
+            cacheBuffer: Config.cacheBuffer
             boundsBehavior: Flickable.DragAndOvershootBounds
 
             delegate: Item {
@@ -57,14 +58,14 @@ ApplicationWindow {
                    height: grid.cellHeight
                    width: grid.cellWidth
 
-
-
                    Rectangle {
                        id: rect
                        clip: true
                        anchors.margins: 0.5
                        anchors.fill: parent
                        color: model.color
+
+                       //TODO: нужны ли следующие 5 строк?
                        radius: 0
                        border {
                            color: "black"
@@ -76,7 +77,7 @@ ApplicationWindow {
                            onClicked: model.blocked ? myAlert() : selected()
 
                            function myAlert(){
-                               messageDialog.text = "Pixel unblocks in " + dataModel.unblockQpixIn(model.index)
+                               messageDialog.text = Config.pixelUnblockText + dataModel.unblockQpixIn(model.index)
                                messageDialog.visible = true
                            }
 
@@ -90,7 +91,7 @@ ApplicationWindow {
 
                            MessageDialog {
                                id: messageDialog
-                               title: "Pixel is blocked now"
+                               title: Config.pixelBlockedText
                                onAccepted: {
 
                                }
@@ -101,42 +102,42 @@ ApplicationWindow {
                        Popup {
                            id: popup
                            parent: overlay
-                           width: 270
-                           height: 80
+                           width: Config.colorPickerWidth
+                           height: Config.colorPickerHeight
                            x: (app.width - popup.width) / 2
                            y: (app.height - popup.height) / 2
                            modal: true
                            focus: true
 
                            GridView{
-                               model: ["white", "red", "blue", "green", "black", "pink", "yellow", "cyan","white", "red", "blue", "green", "black", "pink", "yellow", "cyan"]
+                               //model: ["white", "red", "blue", "green", "black", "pink", "yellow", "cyan","white", "red", "blue", "green", "black", "pink", "yellow", "cyan"]
+                               model: Config.colors
                                anchors.fill: parent
-                               cellHeight: 30
-                               cellWidth: 30
+                               cellHeight: Config.colorPickCellSize
+                               cellWidth: Config.colorPickCellSize
 
                                delegate: ItemDelegate {
                                    id: colorItem
                                    spacing: 0
-                                   height: 30
-                                   width: 30
+                                   height: Config.colorPickCellSize
+                                   width: Config.colorPickCellSize
                                    anchors.margins: 0
 
                                    Rectangle {
-                                       color: modelData
-                                       width: 30
-                                       height: 30
+                                       color: Config.colorsEnum.properties[modelData].color
+                                       width: Config.colorPickCellSize
+                                       height: Config.colorPickCellSize
                                        border {
                                           width: 1
-                                          color: "lightgrey"
+                                          color: Config.colorPickerBorderColor
                                        }
                                    }
                                    MouseArea {
                                        onClicked: paint()
                                        anchors.fill: parent
                                        function paint() {
-                                           dataModel.setQpixById(grid.currentIndex, modelData)
+                                           dataModel.setQpixById(grid.currentIndex, Config.colorsEnum.properties[modelData].number)
                                            popup.close()
-
                                        }
                                    }
                                 }
@@ -145,5 +146,5 @@ ApplicationWindow {
                     }
                 }
             }
-    }
+        }
 }
