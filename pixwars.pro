@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     time_date.cpp
 
 RESOURCES += qml.qrc \
-    qml.qrc
+    qml.qrc \
+    view_config.js
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -37,7 +38,8 @@ DISTFILES += \
     pixwars.pro.user \
     main.qml.autosave \
     qtquickcontrols2.conf \
-    main.qml
+    main.qml \
+    view_config.js
 
 SUBDIRS += \
     pixwars.pro
