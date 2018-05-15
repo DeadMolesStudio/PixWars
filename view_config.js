@@ -18,10 +18,12 @@ var colorsEnum = {
     THIRD: 3,
     FOURTH: 4,
     properties: {
-        1: {color: "000", number: 0},
-        2: {color: "555", number: 1},
-        3: {color: "aaa", number: 2},
-        4: {color: "fff", number: 3}
+        1: {color: "#000", number: 0},
+        2: {color: "#555", number: 1},
+        3: {color: "#aaa", number: 2},
+        4: {color: "#fff", number: 3}
     }
 };
+
+var colors = [colorsEnum.FIRST, colorsEnum.SECOND, colorsEnum.THIRD, colorsEnum.FOURTH];
 

@@ -111,7 +111,7 @@ ApplicationWindow {
 
                            GridView{
                                //model: ["white", "red", "blue", "green", "black", "pink", "yellow", "cyan","white", "red", "blue", "green", "black", "pink", "yellow", "cyan"]
-                               model: Config.colorsEnum
+                               model: Config.colors
                                anchors.fill: parent
                                cellHeight: Config.colorPickCellSize
                                cellWidth: Config.colorPickCellSize
@@ -124,7 +124,7 @@ ApplicationWindow {
                                    anchors.margins: 0
 
                                    Rectangle {
-                                       color: modelData.color
+                                       color: Config.colorsEnum.properties[modelData].color
                                        width: Config.colorPickCellSize
                                        height: Config.colorPickCellSize
                                        border {
@@ -136,7 +136,7 @@ ApplicationWindow {
                                        onClicked: paint()
                                        anchors.fill: parent
                                        function paint() {
-                                           dataModel.setQpixById(grid.currentIndex, modelData.number)
+                                           dataModel.setQpixById(grid.currentIndex, Config.colorsEnum.properties[modelData].number)
                                            popup.close()
                                        }
                                    }
