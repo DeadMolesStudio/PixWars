@@ -17,7 +17,7 @@ public:
     QQmlListProperty<Qpix> data();
 
     Q_INVOKABLE void add(unsigned int id);
-    Q_INVOKABLE void setQpixById(unsigned int id, const QString new_color);
+    Q_INVOKABLE void setQpixById(unsigned int id, const unsigned new_color);
     Q_INVOKABLE QString unblockQpixIn(unsigned int id);
 
     int count() const;
