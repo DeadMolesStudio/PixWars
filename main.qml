@@ -17,6 +17,7 @@ ApplicationWindow {
     maximumHeight: height
     flags: Qt.Window | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowSystemMenuHint
 
+
     QPixelTable{
         id: dataModel
     }
@@ -29,25 +30,28 @@ ApplicationWindow {
         contentHeight: grid.contentHeight
         clip: true
         flickableDirection: Flickable.HorizontalAndVerticalFlick
+        boundsBehavior: Flickable.StopAtBounds
         interactive: true
         onContentYChanged: grid.contentY = contentY
         Rectangle {
             id: background
             anchors.fill: parent
-            color: "grey"
+            color: Config.pixelBorderColor //создание границ при помощи цвета фона
         }
 
         GridView {
             id: grid
             model: dataModel.data
             anchors.fill: parent
-            cellWidth: app.width / Config.num_pixels_width
-            cellHeight: grid.cellWidth
+//            cellWidth: app.width / Config.num_pixels_width
+//            cellHeight: grid.cellWidth
+            cellHeight: app.height / (Math.sqrt(dataModel.count))
+            cellWidth: grid.cellHeight
             interactive: false
             clip: true
             flickableDirection: Flickable.HorizontalAndVerticalFlick
             cacheBuffer: Config.cacheBuffer
-            boundsBehavior: Flickable.DragAndOvershootBounds
+            boundsBehavior: Flickable.StopAtBounds
 
             delegate: Item {
                    property var view: GridView.view
@@ -61,16 +65,9 @@ ApplicationWindow {
                    Rectangle {
                        id: rect
                        clip: true
-                       anchors.margins: 0.5
+                       anchors.margins: Config.pixelMargins;
                        anchors.fill: parent
-                       color: model.color
-
-                       //TODO: нужны ли следующие 5 строк?
-                       radius: 0
-                       border {
-                           color: "black"
-                           width: 0
-                       }
+                       color: Config.colorsEnum.properties[model.color].color
 
                        MouseArea {
                            anchors.fill: parent
@@ -85,7 +82,7 @@ ApplicationWindow {
                                view.currentItem.rect.border.width = 0
                                view.currentIndex = model.index
                                rect.border.width = 2
-                               rect.border.color = "grey"
+                               rect.border.color = Config.selectedBorderColor;
                                popup.open()
                            }
 
@@ -110,11 +107,12 @@ ApplicationWindow {
                            focus: true
 
                            GridView{
-                               //model: ["white", "red", "blue", "green", "black", "pink", "yellow", "cyan","white", "red", "blue", "green", "black", "pink", "yellow", "cyan"]
                                model: Config.colors
                                anchors.fill: parent
                                cellHeight: Config.colorPickCellSize
                                cellWidth: Config.colorPickCellSize
+                               boundsBehavior: Flickable.StopAtBounds
+
 
                                delegate: ItemDelegate {
                                    id: colorItem
