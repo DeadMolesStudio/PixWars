@@ -8,18 +8,18 @@
 class Qpix : public QObject, public PixelClient
 {
     Q_OBJECT
-    Q_PROPERTY(QString color READ getQColor WRITE setQColor NOTIFY colorChanged)
+    Q_PROPERTY(unsigned color READ getQColor WRITE setQColor NOTIFY colorChanged)
     Q_PROPERTY(bool blocked READ pixBlocked WRITE setBlock NOTIFY blockedChanged)
     //Q_PROPERTY(QString time READ getTime WRITE setTime NOTIFY timeChanged)
 public:
     Qpix(QObject *parent = nullptr);
     explicit Qpix(unsigned int id, QObject *parent = nullptr);
 
-    QString getQColor();
+    unsigned getQColor();
     QString getTime();
 
-    void setQpix(const QString new_color);
-    void setQColor(const QString new_color);
+    void setQpix(const unsigned new_color);
+    void setQColor(const unsigned new_color);
     void setBlock(const bool block);
     void setTime(const QString t);
 
@@ -27,7 +27,7 @@ public:
     void blockQpix();
 
 signals:
-    void colorChanged(QString color);
+    void colorChanged(unsigned color);
     void blockedChanged(bool blocked);
     void timeChanged(QString time);
 

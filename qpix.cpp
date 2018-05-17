@@ -13,23 +13,25 @@ Qpix::Qpix(unsigned int id, QObject *parent) :
 }
 
 
-void Qpix::setQpix(const QString new_color)
+void Qpix::setQpix(const unsigned new_color)
 {
     setQColor(new_color);
     blockQpix();
 }
 
 
-QString Qpix::getQColor()
+unsigned Qpix::getQColor()
 {
-    std::string col = PixelClient::getStrColor();
-    QString qcol = QString::fromStdString(col);
-    return qcol;
+    return color;
+//    std::string col = PixelClient::getStrColor();
+//    QString qcol = QString::fromStdString(col);
+//    return qcol;
 }
 
-void Qpix::setQColor(const QString new_color)
+void Qpix::setQColor(const unsigned new_color)
 {
-        PixelClient::setStrColor(new_color.toStdString());
+//        PixelClient::setStrColor(new_color.toStdString());
+        PixelClient::setColor(new_color);
         emit colorChanged(new_color);
 }
 
