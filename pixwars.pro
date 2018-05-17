@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     pixel.cpp \
     pixeltable.cpp \
     qpix.cpp \
-    time_date.cpp
+    time_date.cpp \
+    pixwarsapp.cpp
 
 RESOURCES += qml.qrc \
     qml.qrc \
@@ -49,4 +50,5 @@ HEADERS += \
     pixeltable.h \
     qpix.h \
     qpix.h.autosave \
-    time_date.h
+    time_date.h \
+    pixwarsapp.h
