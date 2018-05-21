@@ -16,10 +16,18 @@ ApplicationWindow {
     minimumHeight: height
     maximumHeight: height
     flags: Qt.Window | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowSystemMenuHint
-
+    onBeforeRendering: dataModel.getField(Config.serverAdress)
 
     QPixelTable{
         id: dataModel
+    }
+
+    Timer{
+        interval: Config.updateInterval
+        repeat: true
+        running: true
+        triggeredOnStart: false
+        onTriggered: dataModel.checkPixels(Config.serverAdress)
     }
 
     Flickable {
@@ -134,7 +142,7 @@ ApplicationWindow {
                                        onClicked: paint()
                                        anchors.fill: parent
                                        function paint() {
-                                           dataModel.setQpixById(grid.currentIndex, Config.colorsEnum.properties[modelData].number)
+                                           dataModel.setQpixById(Config.serverAdress, grid.currentIndex, Config.colorsEnum.properties[modelData].number)
                                            popup.close()
                                        }
                                    }

@@ -1,4 +1,5 @@
-QT += quick
+QT += quick \
+    network
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -17,7 +18,8 @@ SOURCES += main.cpp \
     pixeltable.cpp \
     qpix.cpp \
     time_date.cpp \
-    pixwarsapp.cpp
+    pixwarsapp.cpp \
+
 
 RESOURCES += qml.qrc \
     qml.qrc \
@@ -51,4 +53,4 @@ HEADERS += \
     qpix.h \
     qpix.h.autosave \
     time_date.h \
-    pixwarsapp.h
+    pixwarsapp.h \

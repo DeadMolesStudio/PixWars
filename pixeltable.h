@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QQmlListProperty>
 #include <qpix.h>
+#include <string>
 
 class PixelTable : public QObject
 {
@@ -14,10 +15,16 @@ class PixelTable : public QObject
 public:
     PixelTable(QObject *parent = nullptr);
 
+    Q_INVOKABLE void getField(QString url);
+
     QQmlListProperty<Qpix> data();
 
     Q_INVOKABLE void add(unsigned int id);
-    Q_INVOKABLE void setQpixById(unsigned int id, const unsigned new_color);
+    Q_INVOKABLE void setQpixById(QString url, unsigned int id, const unsigned new_color);
+
+    void setQpixById(unsigned int id, const unsigned new_color, time_t unlock_time);
+    Q_INVOKABLE void checkPixels(QString url);
+
     Q_INVOKABLE QString unblockQpixIn(unsigned int id);
 
     int count() const;
@@ -35,6 +42,11 @@ private:
     static void clearData(QQmlListProperty<Qpix> *list);
 
     QList<Qpix*> listPixels;
+
+public slots:
+    void getPixelsSlot();
+    void paintPixelSlot();
+    void updatePixelsSlot();
 };
 
 #endif // PIXELTABLE_H
