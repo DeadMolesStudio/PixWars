@@ -16,10 +16,21 @@ ApplicationWindow {
     minimumHeight: height
     maximumHeight: height
     flags: Qt.Window | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowSystemMenuHint
-    onBeforeRendering: dataModel.getField(Config.serverAdress)
+
 
     QPixelTable{
         id: dataModel
+    }
+
+    Timer{
+        interval: 0
+        repeat: false
+        running: true
+        triggeredOnStart: true
+        onTriggered: trigger()
+        function trigger(){
+            dataModel.getField(Config.serverAdress)
+        }
     }
 
     Timer{
@@ -142,8 +153,16 @@ ApplicationWindow {
                                        onClicked: paint()
                                        anchors.fill: parent
                                        function paint() {
-                                           dataModel.setQpixById(Config.serverAdress, grid.currentIndex, Config.colorsEnum.properties[modelData].number)
                                            popup.close()
+                                           if(!dataModel.setQpixById(Config.serverAdress,
+                                                                     grid.currentIndex,
+                                                                     Config.colorsEnum.properties[modelData].number))
+                                               failAlert();
+                                       }
+
+                                       function failAlert(){
+                                           messageDialog.text = Config.failText + dataModel.unblockQpixIn(model.index)
+                                           messageDialog.visible = true
                                        }
                                    }
                                 }

@@ -1,5 +1,4 @@
-QT += quick \
-    network
+QT += quick network
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -54,3 +53,5 @@ HEADERS += \
     qpix.h.autosave \
     time_date.h \
     pixwarsapp.h \
+
+include(android-openssl.pri)

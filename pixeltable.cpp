@@ -12,7 +12,7 @@
 #include <QJsonObject>
 #include <QVariantMap>
 #include <QJsonArray>
-
+#include <QEventLoop>
 #include <sstream>
 
 namespace patch
@@ -36,39 +36,58 @@ PixelTable::PixelTable(QObject *parent) :
 
 void PixelTable::getField(QString url)
 {
+    qDebug() << "getField()";
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished()), this, SLOT(getPixelsSlot()));
+//    connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(getPixelsSlot(QNetworkReply *)));
 
     QNetworkRequest request;
     request.setUrl(QUrl(url));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
 
     QJsonObject jsonRequest;
     jsonRequest.insert("command", "get_field");
-    manager->post(request, QJsonDocument(jsonRequest).toJson());
-    manager->deleteLater();
 
-//    if(reply->error() == QNetworkReply::NoError)
-//    {
-//        QString strReply = QString(reply->readAll());
-//        QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
+    QNetworkReply* reply = manager->post(request, QJsonDocument(jsonRequest).toJson());
+    //connect(reply, SIGNAL(readyRead()), this, SLOT(getPixelsSlot()));
 
-//        if(jsonReply["status"] == "OK")
-//        {
-//            for(size_t i = 0; i < jsonReply["field"].toArray().size(); ++i)
-//            {
-//                add(i);
-//                int color = jsonReply["field"].toArray().at(i)["color"].toInt();
-//                time_t time = time_t(jsonReply["field"].toArray().at(i)["unlock_time"].toVariant().toUInt());
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+    qDebug() << "after loop\n";
+    if(reply->error() == QNetworkReply::NoError)
+    {
+        QString strReply = QString(reply->readAll()).remove("\n");
+        QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
+        qDebug() << "strReply: " << strReply.toUtf8() << "\n";
+//        qDebug() << "status: " << jsonReply["status"].toString() << "\n";
+//        qDebug() << "members: " << jsonReply.keys();
+        qDebug() << "pixelCount: " << jsonReply["field"].toArray().size();
+        if(jsonReply["status"].toString().toStdString() == "OK")
+        {
+            qDebug() << "ok";
+            for(size_t i = 0; i < jsonReply["field"].toArray().size(); ++i)
+            {
+//                qDebug() << jsonReply["field"].toArray().at(i)["color"] ;
+                int color = std::stoi(jsonReply["field"].toArray().at(i)["color"].toString().toStdString());
+                time_t time = time_t(std::stoul(jsonReply["field"].toArray().at(i)["unlock_time"].toString().toStdString()));
+                add(i,color,time);
 //                setQpixById(i, color, time);
-//            }
-//        }
-//        delete reply;
-//    }
-//    else
-//    {
-//        qDebug() << "Failure" << reply->errorString();
-//        delete reply;
-//    }
+            }
+            emit countChanged();
+            emit dataChanged();
+        }
+        else
+        {
+            qDebug() << "not ok\n";
+        }
+        delete reply;
+    }
+    else
+    {
+        qDebug() << "Failure" << reply->errorString();
+        delete reply;
+    }
+    manager->deleteLater();
 }
 
 QQmlListProperty<Qpix> PixelTable::data()
@@ -81,12 +100,27 @@ QQmlListProperty<Qpix> PixelTable::data()
 
 void PixelTable::add(unsigned int id)
 {
+    qDebug() << "add(" << id << ")\n";
     Qpix *pix = new Qpix(id,this);
     pix->setProperty("color", pix->getQColor());
     pix->setProperty("blocked", false);
     //pix->setProperty("time","разблокировано");
     listPixels.append(pix);
 
+    emit dataChanged();
+}
+
+void PixelTable::add(unsigned int id, const unsigned new_color, time_t unlock_time)
+{
+    qDebug() << "add(" << id << ", " << new_color << ")\n";
+    Qpix *pix = new Qpix(id,this);
+    pix->setProperty("color", new_color);
+    bool block = false;
+    if ( get_difference(unlock_time) == time(NULL) )
+        block = true;
+    pix->setProperty("blocked", block);
+    //pix->setProperty("time","разблокировано");
+    listPixels.append(pix);
     emit dataChanged();
 }
 
@@ -123,14 +157,15 @@ int PixelTable::count() const
 }
 
 //этот метод теперь для операции paint_pixel
-void PixelTable::setQpixById(QString url, unsigned int id, const unsigned new_color)
+bool PixelTable::setQpixById(QString url, unsigned int id, const unsigned new_color)
 {
     std::cout << "void PixelTable::setQpixById" << std::endl;
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished()), this, SLOT(paintPixelSlot()));
+//    connect(manager, SIGNAL(finished()), this, SLOT(paintPixelSlot()));
 
     QNetworkRequest request;
     request.setUrl(QUrl(url));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
 
     QJsonObject jsonRequest;
     jsonRequest.insert("command", "paint_pixel");
@@ -138,41 +173,50 @@ void PixelTable::setQpixById(QString url, unsigned int id, const unsigned new_co
     pixel.insert("id", patch::to_string(id).c_str());
     pixel.insert("color", patch::to_string(new_color).c_str());
     jsonRequest.insert("pixel_for_paint", pixel);
-    manager->post(request, QJsonDocument(jsonRequest).toJson());
+//    qDebug() << QJsonDocument(jsonRequest).toJson();
+    QNetworkReply* reply = manager->post(request, QJsonDocument(jsonRequest).toJson());
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    bool res = false;
+    if(reply->error() == QNetworkReply::NoError)
+    {
+        QString strReply = QString(reply->readAll());
+        QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
+//        qDebug() << "paintReply:" << strReply;
+        if(jsonReply["status"] == "OK")
+        {
+            setQpixById(id, new_color, time_t(std::stoul(jsonReply["unlock_time"].toString().toStdString())));
+            res = true;
+        }
+        else
+        {
+            setQpixById(id,
+                       std::stoi(jsonReply["failed_pixel"].toObject()["color"].toString().toStdString()),
+                       time_t(std::stoul(jsonReply["failed_pixel"].toObject()["unlock_time"].toString().toStdString())));
+        }
+        delete reply;
+    }
+    else
+    {
+        qDebug() << "Failure" << reply->errorString();
+        delete reply;
+    }
     manager->deleteLater();
-
-//    if(reply->error() == QNetworkReply::NoError)
-//    {
-//        QString strReply = QString(reply->readAll());
-//        QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
-
-//        if(jsonReply["status"] == "OK")
-//        {
-//            listPixels.at(id)->setQpix(new_color);
-//            listPixels.at(id)->setUnlockTime(time_t(jsonReply["unlock_time"].toVariant().toUInt()));
-//        }
-//        else
-//        {
-//            listPixels.at(id)->setQpix(jsonReply["failed_pixel"].toObject()["color"].toInt());
-//            listPixels.at(id)->setUnlockTime(time_t(jsonReply["failed_pixel"].toObject()["unlock_time"].toVariant().toUInt()));
-//            //TODO:: сделал типо сигнал чтоб показывать что тебя опередили и это фиаско
-//        }
-//        delete reply;
-//    }
-//    else
-//    {
-//        qDebug() << "Failure" << reply->errorString();
-//        delete reply;
-//    }
+    return res;
 }
 
 void PixelTable::checkPixels(QString url)
 {
+    qDebug() << "checkPixels()\n";
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished()), this, SLOT(updatePixelsSlot()));
+//    connect(manager, SIGNAL(finished()), this, SLOT(updatePixelsSlot()));
 
     QNetworkRequest request;
     request.setUrl(QUrl(url));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
 
     QJsonObject jsonRequest;
     jsonRequest.insert("command", "update_field");
@@ -185,36 +229,45 @@ void PixelTable::checkPixels(QString url)
         }
     }
     jsonRequest.insert("pixels_for_update", pixels);
-    manager->post(request, QJsonDocument(jsonRequest).toJson());
-    manager->deleteLater();
-//    if(reply->error() == QNetworkReply::NoError)
-//    {
-//        QString strReply = QString(reply->readAll());
-//        QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
+    QNetworkReply* reply = manager->post(request, QJsonDocument(jsonRequest).toJson());
 
-//        if(jsonReply["status"] == "OK")
-//        {
-//            for(int i = 0; i < jsonReply["field"].toArray().size(); ++i)
-//            {
-//                setQpixById(jsonReply["updated_pixels"].toArray().at(i)["id"].toInt(),
-//                            jsonReply["updated_pixels"].toArray().at(i)["color"].toInt(),
-//                            time_t(jsonReply["updated_pixels"].toArray().at(i)["unlock_time"].toVariant().toUInt()));
-//            }
-//        }
-//        delete reply;
-//    }
-//    else
-//    {
-//        qDebug() << "Failure" << reply->errorString();
-//        delete reply;
-//    }
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if(reply->error() == QNetworkReply::NoError)
+    {
+        QString strReply = QString(reply->readAll());
+        QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
+//        qDebug() << strReply;
+
+        if(jsonReply["status"] == "OK")
+        {
+            for(int i = 0; i < jsonReply["field"].toArray().size(); ++i)
+            {
+                setQpixById(std::stoi(jsonReply["updated_pixels"].toArray().at(i)["id"].toString().toStdString()),
+                            std::stoi(jsonReply["updated_pixels"].toArray().at(i)["color"].toString().toStdString()),
+                            time_t(std::stoul(jsonReply["updated_pixels"].toArray().at(i)["unlock_time"].toString().toStdString())));
+                emit dataChanged();
+                emit countChanged();
+            }
+        }
+        delete reply;
+    }
+    else
+    {
+        qDebug() << "Failure" << reply->errorString();
+        delete reply;
+    }
+    manager->deleteLater();
 }
 
 
 void PixelTable::setQpixById(unsigned int id, const unsigned new_color, time_t unlock_time)
 {
-    listPixels.at(id)->setQpix(new_color);
+    listPixels.at(id)->setQColor(new_color);
     listPixels.at(id)->setUnlockTime(unlock_time);
+    emit dataChanged();
 }
 
 
@@ -222,92 +275,3 @@ QString PixelTable::unblockQpixIn(unsigned int id)
 {
     return listPixels.at(id)->UnblockIn();
 }
-
-void PixelTable::getPixelsSlot()
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-
-    if(reply->error() == QNetworkReply::NoError)
-    {
-        QString strReply = QString(reply->readAll());
-        QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
-
-        if(jsonReply["status"] == "OK")
-        {
-            for(size_t i = 0; i < jsonReply["field"].toArray().size(); ++i)
-            {
-                add(i);
-                int color = jsonReply["field"].toArray().at(i)["color"].toInt();
-                time_t time = time_t(jsonReply["field"].toArray().at(i)["unlock_time"].toVariant().toUInt());
-                setQpixById(i, color, time);
-            }
-        }
-        delete reply;
-    }
-    else
-    {
-        qDebug() << "Failure" << reply->errorString();
-        delete reply;
-    }
-}
-
-void PixelTable::paintPixelSlot()
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    QNetworkRequest *request = qobject_cast<QNetworkRequest *>(sender());
-
-    if(reply->error() == QNetworkReply::NoError)
-    {
-        QString strReply = QString(reply->readAll());
-        QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
-
-        if(jsonReply["status"] == "OK")
-        {
-            listPixels.at(id)->setQpix(new_color);
-            listPixels.at(id)->setUnlockTime(time_t(jsonReply["unlock_time"].toVariant().toUInt()));
-        }
-        else
-        {
-            listPixels.at(id)->setQpix(jsonReply["failed_pixel"].toObject()["color"].toInt());
-            listPixels.at(id)->setUnlockTime(time_t(jsonReply["failed_pixel"].toObject()["unlock_time"].toVariant().toUInt()));
-            //TODO:: сделал типо сигнал чтоб показывать что тебя опередили и это фиаско
-        }
-        delete reply;
-    }
-    else
-    {
-        qDebug() << "Failure" << reply->errorString();
-        delete reply;
-    }
-
-}
-
-void PixelTable::updatePixelsSlot()
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-
-    if(reply->error() == QNetworkReply::NoError)
-    {
-        QString strReply = QString(reply->readAll());
-        QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
-
-        if(jsonReply["status"] == "OK")
-        {
-            for(int i = 0; i < jsonReply["field"].toArray().size(); ++i)
-            {
-                setQpixById(jsonReply["updated_pixels"].toArray().at(i)["id"].toInt(),
-                            jsonReply["updated_pixels"].toArray().at(i)["color"].toInt(),
-                            time_t(jsonReply["updated_pixels"].toArray().at(i)["unlock_time"].toVariant().toUInt()));
-            }
-        }
-        delete reply;
-    }
-    else
-    {
-        qDebug() << "Failure" << reply->errorString();
-        delete reply;
-    }
-}
-
-
-

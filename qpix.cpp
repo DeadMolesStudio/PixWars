@@ -16,7 +16,7 @@ Qpix::Qpix(unsigned int id, QObject *parent) :
 void Qpix::setQpix(const unsigned new_color)
 {
     setQColor(new_color);
-    blockQpix();
+//    blockQpix();
 }
 
 

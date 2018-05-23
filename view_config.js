@@ -58,5 +58,6 @@ var colors = [colorsEnum.FIRST, colorsEnum.SECOND, colorsEnum.THIRD, colorsEnum.
               colorsEnum.NINETH, colorsEnum.TENTH, colorsEnum.ELEVENTH, colorsEnum.TWELFTH,
               colorsEnum.THIRTEENTH, colorsEnum.FOURTEENTH, colorsEnum.FIFTEENTH, colorsEnum.SIXTEENTH];
 
-var serverAdress = "127.0.0.1:8000";
+var serverAdress = "http://138.68.185.254:80";
 var updateInterval = 5000; //msec
+var failText = "Вас опередили :( Повторите попытку через ";

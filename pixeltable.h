@@ -5,6 +5,7 @@
 #include <QQmlListProperty>
 #include <qpix.h>
 #include <string>
+#include <QNetworkReply>
 
 class PixelTable : public QObject
 {
@@ -20,7 +21,9 @@ public:
     QQmlListProperty<Qpix> data();
 
     Q_INVOKABLE void add(unsigned int id);
-    Q_INVOKABLE void setQpixById(QString url, unsigned int id, const unsigned new_color);
+    Q_INVOKABLE void add(unsigned int id, const unsigned new_color, time_t unlock_time);
+
+    Q_INVOKABLE bool setQpixById(QString url, unsigned int id, const unsigned new_color);
 
     void setQpixById(unsigned int id, const unsigned new_color, time_t unlock_time);
     Q_INVOKABLE void checkPixels(QString url);
@@ -42,11 +45,6 @@ private:
     static void clearData(QQmlListProperty<Qpix> *list);
 
     QList<Qpix*> listPixels;
-
-public slots:
-    void getPixelsSlot();
-    void paintPixelSlot();
-    void updatePixelsSlot();
 };
 
 #endif // PIXELTABLE_H
