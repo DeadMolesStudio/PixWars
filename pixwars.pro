@@ -10,18 +10,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+# DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += main.cpp \
     pixel.cpp \
     pixeltable.cpp \
     qpix.cpp \
     time_date.cpp \
-    pixwarsapp.cpp \
+    pixwarsapp.cpp
 
 
 RESOURCES += qml.qrc \
-    qml.qrc \
     view_config.js
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -36,7 +35,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    download_img.png \
     pixwars.pro.user \
     main.qml.autosave \
     qtquickcontrols2.conf \
@@ -50,8 +48,7 @@ HEADERS += \
     pixel.h \
     pixeltable.h \
     qpix.h \
-    qpix.h.autosave \
     time_date.h \
-    pixwarsapp.h \
+    pixwarsapp.h
 
-include(android-openssl.pri)
+#include(android-openssl.pri)

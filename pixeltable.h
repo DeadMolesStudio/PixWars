@@ -15,6 +15,7 @@ class PixelTable : public QObject
     Q_CLASSINFO("DefaultProperty", "data")
 public:
     PixelTable(QObject *parent = nullptr);
+    ~PixelTable();
 
     Q_INVOKABLE void getField(QString url);
 
@@ -36,7 +37,8 @@ signals:
     void dataChanged();
     void countChanged();
 
-public slots:
+private slots:
+    void checkPixelsSlot();
 
 private:
     static void appendData(QQmlListProperty<Qpix> *list, Qpix *value);
@@ -45,6 +47,7 @@ private:
     static void clearData(QQmlListProperty<Qpix> *list);
 
     QList<Qpix*> listPixels;
+    QNetworkAccessManager *manager;
 };
 
 #endif // PIXELTABLE_H

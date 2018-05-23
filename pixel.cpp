@@ -105,7 +105,7 @@ void PixelClient::setUnlockTime(const time_t time)
 {
     if ( time == unlock_time )
         return;
-     unlock_time = time;
+    unlock_time = time;
 }
 
 void PixelClient::setUnlockTime()
