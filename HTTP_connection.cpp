@@ -56,20 +56,28 @@ void HTTP_connection::handle_read(const boost::system::error_code& error,
     try {
         boost::property_tree::read_json(ss, root);
         auto command = root.get<std::string>("command");
-        if (command == "update_field") {
-            std::vector<unsigned int> pixels;
-            for (boost::property_tree::ptree::value_type& value
-                    : root.get_child("pixels_for_update")) {
-                if (!value.first.empty())
-                    throw std::invalid_argument
-                            ("Wrong format of update_field command got.\n");
-                pixels.push_back(value.second.get_value<unsigned int>());
-            }
-
-            update_field(pixels,
-                         boost::bind(&HTTP_connection::serialize_updated_pixels,
-                                     shared_from_this(),
-                                     boost::placeholders::_1));
+//        if (command == "update_field") {
+//            std::vector<unsigned int> pixels;
+//            for (boost::property_tree::ptree::value_type& value
+//                    : root.get_child("pixels_for_update")) {
+//                if (!value.first.empty())
+//                    throw std::invalid_argument
+//                            ("Wrong format of update_field command got.\n");
+//                pixels.push_back(value.second.get_value<unsigned int>());
+//            }
+//
+//            update_field(pixels,
+//                         boost::bind(&HTTP_connection::serialize_updated_pixels,
+//                                     shared_from_this(),
+//                                     boost::placeholders::_1));
+//        }
+        if (command == "update_since_last_update") {
+            auto last_update = root.get<time_t>("last_update");
+            update_since_last_update(
+                last_update,
+                boost::bind(&HTTP_connection::serialize_updated_pixels,
+                            shared_from_this(),
+                            boost::placeholders::_1));
         }
         else if (command == "paint_pixel") {
             unsigned int id = 0;

@@ -22,6 +22,18 @@ void update_field(std::vector<unsigned int>& pixels,
     serialize_updated_pixels(updated_pixels);
 }
 
+void update_since_last_update(time_t last_update, const std::function<void(
+        const std::vector<const PixelServer*>&)>& serialize_updated_pixels) {
+    // get pixels for update (check time)
+    std::vector<const PixelServer*> updated_pixels;
+    for (auto i : game_field) {
+        if (i->getEditTime() >= last_update)
+            updated_pixels.push_back(i);
+    }
+    // callback
+    serialize_updated_pixels(updated_pixels);
+}
+
 void paint_pixel(unsigned int id,
                  unsigned short color,
                  const std::function<void(const PixelServer&, bool)>&

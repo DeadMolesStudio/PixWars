@@ -11,6 +11,10 @@
 void update_field(std::vector<unsigned int>& pixels,
                   const std::function<void(const std::vector<const PixelServer*>&)>&
                           serialize_updated_pixels);
+/// Sends only pixels with unlocking time greater than the last update time
+void update_since_last_update(time_t last_update,
+                              const std::function<void(const std::vector<const PixelServer*>&)>&
+                              serialize_updated_pixels);
 /// Paints pixel if it's unlocked
 void paint_pixel(unsigned int id,
                  unsigned short color,
