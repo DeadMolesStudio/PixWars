@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "pixel.h"
 
 std::vector<std::string> list_color
