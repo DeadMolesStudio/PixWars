@@ -45,9 +45,10 @@ private:
     static int countData(QQmlListProperty<Qpix> *list);
     static Qpix *atData(QQmlListProperty<Qpix> *list, int index);
     static void clearData(QQmlListProperty<Qpix> *list);
+    time_t last_update;
 
     QList<Qpix*> listPixels;
-    QNetworkAccessManager *manager;
+//    QNetworkAccessManager *manager;
 };
 
 #endif // PIXELTABLE_H

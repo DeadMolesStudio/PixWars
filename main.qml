@@ -17,6 +17,16 @@ ApplicationWindow {
     maximumHeight: height
     flags: Qt.Window | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowSystemMenuHint
 
+    MessageDialog {
+        id: helpAlert
+        title: Config.helpTextTitle
+        text: Config.helpText
+
+        onAccepted: {
+
+        }
+        visible: false
+    }
 
     QPixelTable{
         id: dataModel
@@ -30,6 +40,7 @@ ApplicationWindow {
         onTriggered: trigger()
         function trigger(){
             dataModel.getField(Config.serverAdress)
+            helpAlert.visible = true
         }
     }
 
@@ -98,11 +109,11 @@ ApplicationWindow {
                            }
 
                            function selected(){
+                               popup.open()
                                view.currentItem.rect.border.width = 0
                                view.currentIndex = model.index
                                rect.border.width = 2
                                rect.border.color = Config.selectedBorderColor;
-                               popup.open()
                            }
 
                            MessageDialog {
@@ -154,10 +165,10 @@ ApplicationWindow {
                                        anchors.fill: parent
                                        function paint() {
                                            popup.close()
-                                           if(!dataModel.setQpixById(Config.serverAdress,
-                                                                     grid.currentIndex,
-                                                                     Config.colorsEnum.properties[modelData].number))
-                                               failAlert();
+                                           var temp = dataModel.setQpixById(Config.serverAdress,
+                                                                            grid.currentIndex,
+                                                                            Config.colorsEnum.properties[modelData].number);
+                                           if(!temp) failAlert();
                                        }
 
                                        function failAlert(){

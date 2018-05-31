@@ -28,18 +28,20 @@ namespace patch
 PixelTable::PixelTable(QObject *parent) :
     QObject(parent)
 {
-     manager = new QNetworkAccessManager(this);
+//     manager = new QNetworkAccessManager(this);
 }
 
 PixelTable::~PixelTable()
 {
-    manager->deleteLater();
+//    manager->deleteLater();
 }
 
 void PixelTable::getField(QString url)
 {
+    time_t now;
+    last_update = time(&now);
     qDebug() << "getField()";
-//    connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(getPixelsSlot(QNetworkReply *)));
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
 
     QNetworkRequest request;
     request.setUrl(QUrl(url));
@@ -90,6 +92,7 @@ void PixelTable::getField(QString url)
         qDebug() << "Failure" << reply->errorString();
         delete reply;
     }
+    manager->deleteLater();
 }
 
 QQmlListProperty<Qpix> PixelTable::data()
@@ -106,7 +109,6 @@ void PixelTable::add(unsigned int id)
     Qpix *pix = new Qpix(id,this);
     pix->setProperty("color", pix->getQColor());
     pix->setProperty("blocked", false);
-    //pix->setProperty("time","разблокировано");
     listPixels.append(pix);
 
     emit dataChanged();
@@ -118,10 +120,9 @@ void PixelTable::add(unsigned int id, const unsigned new_color, time_t unlock_ti
     Qpix *pix = new Qpix(id,this);
     pix->setProperty("color", new_color);
     bool block = false;
-    if ( get_difference(unlock_time) == time(NULL) )
+    if ( get_difference(unlock_time) >= time(NULL) )
         block = true;
     pix->setProperty("blocked", block);
-    //pix->setProperty("time","разблокировано");
     listPixels.append(pix);
     emit dataChanged();
 }
@@ -161,9 +162,7 @@ int PixelTable::count() const
 //этот метод теперь для операции paint_pixel
 bool PixelTable::setQpixById(QString url, unsigned int id, const unsigned new_color)
 {
-    std::cout << "void PixelTable::setQpixById" << std::endl;
-//    connect(manager, SIGNAL(finished()), this, SLOT(paintPixelSlot()));
-
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
     QNetworkRequest request;
     request.setUrl(QUrl(url));
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
@@ -189,7 +188,7 @@ bool PixelTable::setQpixById(QString url, unsigned int id, const unsigned new_co
 //        qDebug() << "paintReply:" << strReply;
         if(jsonReply["status"] == "OK")
         {
-            setQpixById(id, new_color, time_t(jsonReply["unlock_time"].toString().toInt()));
+            setQpixById(id, new_color, time_t(jsonReply["unlock_time"].toString().toUInt()));
             res = true;
         }
         else
@@ -205,6 +204,7 @@ bool PixelTable::setQpixById(QString url, unsigned int id, const unsigned new_co
         qDebug() << "Failure" << reply->errorString();
         delete reply;
     }
+    delete manager;
     return res;
 }
 
@@ -212,23 +212,31 @@ void PixelTable::checkPixels(QString url)
 {
     qDebug() << "checkPixels()\n";
 
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+
     QNetworkRequest request;
     request.setUrl(QUrl(url));
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
 
     QJsonObject jsonRequest;
-    jsonRequest.insert("command", "update_field");
-    QJsonArray pixels;
-    for(size_t i = 0; i < this->count(); i++)
-    {
-        if(!listPixels[i]->pixBlocked())
-        {
-            pixels.append(patch::to_string(i).c_str());
-        }
-    }
-    jsonRequest.insert("pixels_for_update", pixels);
+//    jsonRequest.insert("command", "update_field");
+    jsonRequest.insert("command", "update_since_last_update");
+    jsonRequest.insert("last_update", QJsonValue::fromVariant(QVariant(unsigned(last_update+35))));
+    time_t now;
+    last_update = time(&now);
+//    QJsonArray pixels;
+//    size_t size = this->count();
+//    for(size_t i = 0; i < size; i++)
+//    {
+//        if(!listPixels[i]->pixBlocked())
+//        {
+//            pixels.append(patch::to_string(i).c_str());
+//        }
+//    }
+//    jsonRequest.insert("pixels_for_update", pixels);
     QNetworkReply* reply = manager->post(request, QJsonDocument(jsonRequest).toJson());
-//    connect(reply, SIGNAL(finished()), this, SLOT(checkPixelsSlot()));
+    connect(reply, SIGNAL(finished()), this, SLOT(checkPixelsSlot()));
+//    manager->deleteLater();
 
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -236,22 +244,25 @@ void PixelTable::checkPixels(QString url)
 
     if(reply->error() == QNetworkReply::NoError)
     {
-        QString strReply = QString(reply->readAll()).remove("\n");
+        QString strReply = QString(reply->readAll());
         QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
-//        qDebug() << strReply;
-//        qDebug() << "pixelCount: " << jsonReply["updates_pixels"].toArray().size();
 
         if(jsonReply["status"] == "OK")
         {
-            qDebug() << "ok";
-            for(size_t i = 0; i < jsonReply["updated_pixels"].toArray().size(); ++i)
+            size_t size = jsonReply["updated_pixels"].toArray().size();
+            if(size > 0)
             {
-                unsigned id = jsonReply["updated_pixels"].toArray().at(i)["id"].toString().toInt();
-                int color = jsonReply["updated_pixels"].toArray().at(i)["color"].toString().toInt();
-                time_t time = time_t(jsonReply["updated_pixels"].toArray().at(i)["unlock_time"].toString().toUInt());
-                setQpixById(id, color, time);
+                qDebug() << "chekpixels size" << size;
+                for(size_t i = 0; i < size; ++i)
+                {
+                    QJsonValue current = jsonReply["updated_pixels"].toArray().at(i);
+                    unsigned id = current["id"].toString().toInt();
+                    int color = current["color"].toString().toInt();
+                    time_t time = current["unlock_time"].toString().toUInt();
+                    setQpixById(id, color, time);
+                }
+                emit dataChanged();
             }
-            emit dataChanged();
         }
         else
         {
@@ -269,24 +280,20 @@ void PixelTable::checkPixels(QString url)
 
 void PixelTable::setQpixById(unsigned int id, const unsigned new_color, time_t unlock_time)
 {
-//    listPixels.at(id)->setQColor(new_color);
-//    listPixels.at(id)->setUnlockTime(unlock_time);
-
-//    emit dataChanged();
-    qDebug() << "setQpixById(" << id << ", " << new_color << ")";
     Qpix *pix = listPixels.at(id);
     pix->setProperty("color", new_color);
     bool block = false;
-    if ( get_difference(unlock_time) == time(NULL) )
+    if ( get_difference(unlock_time) >= time(NULL) )
         block = true;
     pix->setProperty("blocked", block);
     pix->setUnlockTime(unlock_time);
+    emit pix->blockedChanged(pix->pixBlocked());
 }
 
 
 QString PixelTable::unblockQpixIn(unsigned int id)
 {
-    return listPixels.at(id)->UnblockIn();
+    return QString(listPixels.at(id)->leftTime().c_str());
 }
 
 void PixelTable::checkPixelsSlot()
@@ -295,22 +302,25 @@ void PixelTable::checkPixelsSlot()
     QNetworkReply *reply= qobject_cast<QNetworkReply *>(sender());
     if(reply->error() == QNetworkReply::NoError)
     {
-        QString strReply = QString(reply->readAll()).remove("\n");
+        QString strReply = QString(reply->readAll());
         QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
-//        qDebug() << strReply;
-//        qDebug() << "pixelCount: " << jsonReply["updates_pixels"].toArray().size();
 
         if(jsonReply["status"] == "OK")
         {
-            qDebug() << "ok";
-            for(size_t i = 0; i < jsonReply["updated_pixels"].toArray().size(); ++i)
+            size_t size = jsonReply["updated_pixels"].toArray().size();
+            if(size > 0)
             {
-                unsigned id = jsonReply["updated_pixels"].toArray().at(i)["id"].toString().toInt();
-                int color = jsonReply["updated_pixels"].toArray().at(i)["color"].toString().toInt();
-                time_t time = time_t(jsonReply["updated_pixels"].toArray().at(i)["unlock_time"].toString().toUInt());
-                setQpixById(id, color, time);
+                qDebug() << "chekpixels size" << size;
+                for(size_t i = 0; i < size; ++i)
+                {
+                    QJsonValue current = jsonReply["updated_pixels"].toArray().at(i);
+                    unsigned id = current["id"].toString().toInt();
+                    int color = current["color"].toString().toInt();
+                    time_t time = current["unlock_time"].toString().toUInt();
+                    setQpixById(id, color, time);
+                }
+                emit dataChanged();
             }
-            emit dataChanged();
         }
         else
         {

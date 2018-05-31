@@ -25,7 +25,7 @@ std::string get_time(time_t time)
 
 time_t get_block_time(time_t time)
 {
-    time += 60 * 5;
+    time += 600000000;
     return time;
 }
 
@@ -34,11 +34,12 @@ time_t get_difference(time_t t)
     time_t now;
     time(&now);
 
-   // std::cout << "now is    "<< get_time(now) << "      un is" << get_time(t);
 
-    if ( now >= t )
+    time_t utc_now =  now;
+
+    if ( utc_now >= t )
         return time(NULL);
-    return t - now;
+    return t - utc_now;
 }
 
 
