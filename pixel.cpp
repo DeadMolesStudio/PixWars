@@ -1,12 +1,5 @@
 #include "pixel.h"
 
-std::vector<std::string> list_color
-        {
-                "white", "red", "blue", "green", "black", "pink", "yellow", "cyan"
-        };
-
-
-
 Pixel::Pixel(unsigned int id) :
     id(id), color(0)
 {
@@ -53,20 +46,6 @@ time_t PixelServer::getEditTime() const
     return edit_time;
 }
 
-std::string PixelServer::toJson()
-{
-    return " ";
-}
-
-void PixelServer::printPixel()
-{
-    std::cout << "SERVER pixel" << std::endl;
-    std::cout << "id: " << id << std::endl;
-    std::cout << "color: " << color << std::endl;
-    std::cout << "blocked: " << blocked << std::endl;
-    std::cout << "edit_time: " << get_time(edit_time) << std::endl;
-    std::cout << "------------" << std::endl;
-}
 
 PixelClient::PixelClient(unsigned int id) :
     Pixel(id), unlock_time(NULL)
@@ -80,12 +59,6 @@ PixelClient::~PixelClient()
 time_t PixelClient::getUnlockTime() const
 {
     return unlock_time;
-}
-
-
-std::string PixelClient::getStrColor() const
-{
-    return list_color[color];
 }
 
 bool PixelClient::pixBlocked() const
@@ -108,22 +81,6 @@ void PixelClient::setUnlockTime()
     unlock_time = get_block_time(now);
 }
 
-void PixelClient::setStrColor(const std::string new_color)
-{
-    if ( new_color == list_color[color] )
-        return;
-    for(int i = 0; i < list_color.size(); i++)
-    {
-        if(list_color[i] == new_color)
-        {
-            color = i;
-            return;
-        }
-    }
-//    std::vector<std::string>::iterator it = std::find(list_color.begin(),list_color.end(), new_color);
-//    color = std::distance(list_color.begin(), it);
-}
-
 #include <sstream>
 
 namespace patch
@@ -144,25 +101,10 @@ std::string PixelClient::leftTime() const
     std::cout << "  PixelClient::leftTime()     " << rest << std::endl;
     std::string min = patch::to_string(rest / 60);
     std::string sec = patch::to_string(rest % 60);
-//    std::string min = rest / 60;
-//    std::string sec = rest % 60;
 
     return min + ":" + sec;
 }
 
-std::string PixelClient::toJson()
-{
-    return " ";
-}
-
-void PixelClient::printPixel()
-{
-    std::cout << "CLIENT pixel" << std::endl;
-    std::cout << "id: " << id << std::endl;
-    std::cout << "color: " << color << std::endl;
-    std::cout << "unlock_time: " << get_time(unlock_time) << std::endl;
-    std::cout << "------------" << std::endl;
-}
 
 
 

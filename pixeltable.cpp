@@ -27,14 +27,10 @@ namespace patch
 
 PixelTable::PixelTable(QObject *parent) :
     QObject(parent)
-{
-//     manager = new QNetworkAccessManager(this);
-}
+{}
 
 PixelTable::~PixelTable()
-{
-//    manager->deleteLater();
-}
+{}
 
 void PixelTable::getField(QString url)
 {
@@ -51,7 +47,6 @@ void PixelTable::getField(QString url)
     jsonRequest.insert("command", "get_field");
 
     QNetworkReply* reply = manager->post(request, QJsonDocument(jsonRequest).toJson());
-    //connect(reply, SIGNAL(readyRead()), this, SLOT(getPixelsSlot()));
 
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -61,22 +56,14 @@ void PixelTable::getField(QString url)
     {
         QString strReply = QString(reply->readAll()).remove("\n");
         QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
-        qDebug() << "strReply: " << strReply.toUtf8() << "\n";
-//        qDebug() << "status: " << jsonReply["status"].toString() << "\n";
-//        qDebug() << "members: " << jsonReply.keys();
-        qDebug() << "pixelCount: " << jsonReply["field"].toArray().size();
         if(jsonReply["status"].toString().toStdString() == "OK")
         {
             qDebug() << "ok";
             for(size_t i = 0; i < jsonReply["field"].toArray().size(); ++i)
             {
-//                qDebug() << jsonReply["field"].toArray().at(i)["color"] ;
-//                int color = std::stoi(jsonReply["field"].toArray().at(i)["color"].toString().toStdString());
-//                time_t time = time_t(std::stoul(jsonReply["field"].toArray().at(i)["unlock_time"].toString().toStdString()));
                 int color = jsonReply["field"].toArray().at(i)["color"].toString().toInt();
                 time_t time = time_t(jsonReply["field"].toArray().at(i)["unlock_time"].toString().toInt());
                 add(i,color,time);
-//                setQpixById(i, color, time);
             }
             emit countChanged();
             emit dataChanged();
@@ -103,20 +90,8 @@ QQmlListProperty<Qpix> PixelTable::data()
                                      &PixelTable::atData, &PixelTable::clearData);
 }
 
-void PixelTable::add(unsigned int id)
-{
-    qDebug() << "add(" << id << ")\n";
-    Qpix *pix = new Qpix(id,this);
-    pix->setProperty("color", pix->getQColor());
-    pix->setProperty("blocked", false);
-    listPixels.append(pix);
-
-    emit dataChanged();
-}
-
 void PixelTable::add(unsigned int id, const unsigned new_color, time_t unlock_time)
 {
-    qDebug() << "add(" << id << ", " << new_color << ")\n";
     Qpix *pix = new Qpix(id,this);
     pix->setProperty("color", new_color);
     bool block = false;
@@ -185,7 +160,6 @@ bool PixelTable::setQpixById(QString url, unsigned int id, const unsigned new_co
     {
         QString strReply = QString(reply->readAll());
         QJsonObject jsonReply = QJsonDocument::fromJson(strReply.toUtf8()).object();
-//        qDebug() << "paintReply:" << strReply;
         if(jsonReply["status"] == "OK")
         {
             setQpixById(id, new_color, time_t(jsonReply["unlock_time"].toString().toUInt()));
@@ -219,24 +193,13 @@ void PixelTable::checkPixels(QString url)
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
 
     QJsonObject jsonRequest;
-//    jsonRequest.insert("command", "update_field");
     jsonRequest.insert("command", "update_since_last_update");
     jsonRequest.insert("last_update", QJsonValue::fromVariant(QVariant(unsigned(last_update+35))));
     time_t now;
     last_update = time(&now);
-//    QJsonArray pixels;
-//    size_t size = this->count();
-//    for(size_t i = 0; i < size; i++)
-//    {
-//        if(!listPixels[i]->pixBlocked())
-//        {
-//            pixels.append(patch::to_string(i).c_str());
-//        }
-//    }
-//    jsonRequest.insert("pixels_for_update", pixels);
+
     QNetworkReply* reply = manager->post(request, QJsonDocument(jsonRequest).toJson());
     connect(reply, SIGNAL(finished()), this, SLOT(checkPixelsSlot()));
-//    manager->deleteLater();
 
     QEventLoop loop;
     connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));

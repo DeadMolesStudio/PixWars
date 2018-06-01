@@ -10,7 +10,6 @@ class Qpix : public QObject, public PixelClient
     Q_OBJECT
     Q_PROPERTY(unsigned color READ getQColor WRITE setQColor NOTIFY colorChanged)
     Q_PROPERTY(bool blocked READ pixBlocked WRITE setBlock NOTIFY blockedChanged)
-    //Q_PROPERTY(QString time READ getTime WRITE setTime NOTIFY timeChanged)
 public:
     Qpix(QObject *parent = nullptr);
     explicit Qpix(unsigned int id, QObject *parent = nullptr);

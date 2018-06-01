@@ -21,7 +21,7 @@ public:
 
     QQmlListProperty<Qpix> data();
 
-    Q_INVOKABLE void add(unsigned int id);
+
     Q_INVOKABLE void add(unsigned int id, const unsigned new_color, time_t unlock_time);
 
     Q_INVOKABLE bool setQpixById(QString url, unsigned int id, const unsigned new_color);
@@ -48,7 +48,7 @@ private:
     time_t last_update;
 
     QList<Qpix*> listPixels;
-//    QNetworkAccessManager *manager;
+
 };
 
 #endif // PIXELTABLE_H
