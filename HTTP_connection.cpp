@@ -10,6 +10,7 @@
 #include "HTTP_connection.hpp"
 #include "pixel_server.hpp"
 #include "server_models.hpp"
+#include "logger.hpp"
 
 
 HTTP_connection::HTTP_connection(boost::asio::io_context& io_context)
@@ -34,8 +35,10 @@ void HTTP_connection::read_request() {
 void HTTP_connection::handle_read(const boost::system::error_code& error,
                                  size_t bytes_transferred) {
     // handle the error
-    if (error)
+    if (error) {
+        write_log(error.message());
         return;
+    }
 
     if (request.method() != boost::beast::http::verb::post) {
         send_response("Bad method.\n",
@@ -117,8 +120,10 @@ void HTTP_connection::handle_read(const boost::system::error_code& error,
 
 void HTTP_connection::handle_write (const boost::system::error_code& error) {
     // handle error
-    if (error)
+    if (error) {
+        write_log(error.message());
         return;
+    }
 }
 
 void HTTP_connection::send_response(std::string message,

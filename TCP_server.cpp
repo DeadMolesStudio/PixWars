@@ -6,6 +6,7 @@
 
 #include "TCP_server.hpp"
 #include "HTTP_connection.hpp"
+#include "logger.hpp"
 
 
 enum TCPConsts {
@@ -24,6 +25,7 @@ void TCP_server::run_server() {
 
     start_accept();
 
+    write_log("Run server");
     std::cout << "Run server on " << port << " port with "
               << max_connections << " max connections and "
               << max_threads << " max threads." << std::endl;
