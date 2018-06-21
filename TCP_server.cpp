@@ -1,5 +1,6 @@
 #include "TCP_server.hpp"
 
+// implementation
 
 #include <boost/bind.hpp>
 #include <iostream>
@@ -14,7 +15,7 @@
 
 
 /// Asynchronous server with threads
-class TCP_server_impl {
+class TCP_server::TCP_server_impl {
  public:
     TCP_server_impl(unsigned short port = 80);
 
@@ -45,13 +46,13 @@ enum TCPConsts {
     max_threads = 4,
 };
 
-TCP_server_impl::TCP_server_impl(unsigned short port)
+TCP_server::TCP_server_impl::TCP_server_impl(unsigned short port)
         : port(port),
           endpoint(boost::asio::ip::tcp::v4(), port),
         // initialises an acceptor to listen on TCP port port
           acceptor(io_context, endpoint, /* reuse_addr = */ true) {}
 
-void TCP_server_impl::run_server() {
+void TCP_server::TCP_server_impl::run_server() {
     acceptor.listen(max_connections);
 
     start_accept();
@@ -68,7 +69,7 @@ void TCP_server_impl::run_server() {
         thread.join();
 }
 
-void TCP_server_impl::handle_accept(std::shared_ptr<HTTP_connection> connection,
+void TCP_server::TCP_server_impl::handle_accept(std::shared_ptr<HTTP_connection> connection,
                                     const boost::system::error_code& error) {
     if (!error) {
         connection->read_request();
@@ -77,7 +78,7 @@ void TCP_server_impl::handle_accept(std::shared_ptr<HTTP_connection> connection,
     start_accept();
 }
 
-void TCP_server_impl::start_accept() {
+void TCP_server::TCP_server_impl::start_accept() {
     std::shared_ptr<HTTP_connection> connection
             (new HTTP_connection(acceptor.get_executor().context()));
     acceptor.async_accept(connection->get_socket(),
@@ -86,7 +87,7 @@ void TCP_server_impl::start_accept() {
                     boost::asio::placeholders::error));
 }
 
-void TCP_server_impl::run() {
+void TCP_server::TCP_server_impl::run() {
     io_context.run();
 }
 

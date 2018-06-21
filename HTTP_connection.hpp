@@ -21,12 +21,6 @@ class HTTP_connection : public std::enable_shared_from_this<HTTP_connection> {
  private:
     class HTTP_connection_impl;
     HTTP_connection_impl* p;
-
-    /// Serialize JSON for response
-    void serialize_updated_pixels(
-            const std::vector<const PixelServer*>& updated_pixels);
-    void serialize_painted_pixel(const PixelServer& pixel, bool success);
-    void serialize_all_field(const std::vector<const PixelServer*>& field);
 };
 
 #endif //CPP_SERVER_CONNECTION_HPP
