@@ -30,7 +30,6 @@ void TCP_server::run_server() {
               << max_connections << " max connections and "
               << max_threads << " max threads." << std::endl;
 
-    // running io_contexts in threads?
     std::vector<std::thread> threads;
     for (int i = 0; i < max_threads; i++)
         threads.emplace_back(std::thread(std::bind(&TCP_server::run, this)));

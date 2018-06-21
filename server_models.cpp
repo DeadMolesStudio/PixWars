@@ -11,7 +11,6 @@ extern std::vector<PixelServer*> game_field;
 void update_field(std::vector<unsigned int>& pixels,
                   const std::function<void(const std::vector<const PixelServer*>&)>&
                       serialize_updated_pixels) {
-    // get pixels for update
     std::vector<const PixelServer*> updated_pixels;
     for (auto i : pixels) {
         if (i >= game_field.size()) // fixme: never works
@@ -24,7 +23,6 @@ void update_field(std::vector<unsigned int>& pixels,
 
 void update_since_last_update(time_t last_update, const std::function<void(
         const std::vector<const PixelServer*>&)>& serialize_updated_pixels) {
-    // get pixels for update (check time)
     std::vector<const PixelServer*> updated_pixels;
     for (auto i : game_field) {
         if (i->getEditTime() >= last_update)
@@ -59,7 +57,6 @@ void paint_pixel(unsigned int id,
 
 void get_field(const std::function<void(const std::vector<const PixelServer*>&)>&
                        serialize_all_field) {
-    // get all field
     std::vector<const PixelServer*> field;
     for (auto i : game_field) {
         field.push_back(i);

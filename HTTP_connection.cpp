@@ -21,7 +21,6 @@ boost::asio::ip::tcp::socket& HTTP_connection::get_socket() {
 }
 
 void HTTP_connection::read_request() {
-    /// read the request
     boost::beast::http::async_read(
         socket,
         buffer,
@@ -34,7 +33,6 @@ void HTTP_connection::read_request() {
 
 void HTTP_connection::handle_read(const boost::system::error_code& error,
                                  size_t bytes_transferred) {
-    // handle the error
     if (error) {
         write_log(error.message());
         return;
@@ -49,7 +47,7 @@ void HTTP_connection::handle_read(const boost::system::error_code& error,
         send_response("No content-length given.\n",
                 boost::beast::http::status::length_required);
         return;
-    } // more errors...
+    }
 
     // parsing the request
     std::stringstream ss;
@@ -59,21 +57,6 @@ void HTTP_connection::handle_read(const boost::system::error_code& error,
     try {
         boost::property_tree::read_json(ss, root);
         auto command = root.get<std::string>("command");
-//        if (command == "update_field") {
-//            std::vector<unsigned int> pixels;
-//            for (boost::property_tree::ptree::value_type& value
-//                    : root.get_child("pixels_for_update")) {
-//                if (!value.first.empty())
-//                    throw std::invalid_argument
-//                            ("Wrong format of update_field command got.\n");
-//                pixels.push_back(value.second.get_value<unsigned int>());
-//            }
-//
-//            update_field(pixels,
-//                         boost::bind(&HTTP_connection::serialize_updated_pixels,
-//                                     shared_from_this(),
-//                                     boost::placeholders::_1));
-//        }
         if (command == "update_since_last_update") {
             auto last_update = root.get<time_t>("last_update");
             update_since_last_update(
@@ -119,22 +102,20 @@ void HTTP_connection::handle_read(const boost::system::error_code& error,
 }
 
 void HTTP_connection::handle_write (const boost::system::error_code& error) {
-    // handle error
     if (error) {
         write_log(error.message());
         return;
     }
 }
 
+/// HTTP/1.1 400 Bad Request ({ request.version() } { code })
+/// Content-Type: application/json
+/// Content-Length: 0 ({ strlen(message) })
+/// Connection: close
+///
+/// { message }
 void HTTP_connection::send_response(std::string message,
                                     boost::beast::http::status code) {
-    /// HTTP/1.1 400 Bad Request ({ request.version() } { code })
-    /// Content-Type: application/json
-    /// Content-Length: 0 ({ strlen(message) })
-    /// Connection: close
-    ///
-    /// { message }
-    // response = {};
     response.version(request.version());
     response.result(code);
     if (code == boost::beast::http::status::ok)
