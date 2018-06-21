@@ -1,3 +1,12 @@
+#include <boost/asio.hpp>
+
+#include "HTTP_connection.hpp"
+#include "pixel_server.hpp"
+#include "server_models.hpp"
+#include "logger.hpp"
+
+
+
 #include <boost/beast.hpp>
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
@@ -7,32 +16,65 @@
 #include <sstream>
 #include <string>
 
-#include "HTTP_connection.hpp"
 #include "pixel_server.hpp"
 #include "server_models.hpp"
 #include "logger.hpp"
 
 
-HTTP_connection::HTTP_connection(boost::asio::io_context& io_context)
-    : socket(io_context) {}
+#include <boost/asio.hpp>
 
-boost::asio::ip::tcp::socket& HTTP_connection::get_socket() {
+
+class HTTP_connection_impl : public std::enable_shared_from_this<HTTP_connection_impl> {
+ public:
+    HTTP_connection_impl(boost::asio::io_context& io_context);
+
+    boost::asio::ip::tcp::socket& get_socket();
+
+    /// Read the data from the client
+    void read_request();
+    /// Serialize JSON for response
+    void serialize_updated_pixels(
+            const std::vector<const PixelServer*>& updated_pixels);
+    void serialize_painted_pixel(const PixelServer& pixel, bool success);
+    void serialize_all_field(const std::vector<const PixelServer*>& field);
+ private:
+    boost::asio::ip::tcp::socket socket; // socket for connection
+    boost::beast::flat_buffer buffer;
+    boost::beast::http::request<boost::beast::http::string_body> request;
+    boost::beast::http::response<boost::beast::http::string_body> response;
+
+    /// Parse the client's response
+    void handle_read(const boost::system::error_code& error,
+                     size_t bytes_transferred);
+    void handle_write(const boost::system::error_code& error);
+
+    /// Send the response to the client
+    void send_response(std::string message,
+                       boost::beast::http::status code
+                       = boost::beast::http::status::ok);
+
+};
+
+HTTP_connection_impl::HTTP_connection_impl(boost::asio::io_context& io_context)
+        : socket(io_context) {}
+
+boost::asio::ip::tcp::socket& HTTP_connection_impl::get_socket() {
     return socket;
 }
 
-void HTTP_connection::read_request() {
+void HTTP_connection_impl::read_request() {
     boost::beast::http::async_read(
-        socket,
-        buffer,
-        request,
-        boost::bind(&HTTP_connection::handle_read,
+            socket,
+            buffer,
+            request,
+            boost::bind(&HTTP_connection_impl::handle_read,
                     shared_from_this(),
                     boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred));
 }
 
-void HTTP_connection::handle_read(const boost::system::error_code& error,
-                                 size_t bytes_transferred) {
+void HTTP_connection_impl::handle_read(const boost::system::error_code& error,
+                                       size_t bytes_transferred) {
     if (error) {
         write_log(error.message());
         return;
@@ -60,8 +102,8 @@ void HTTP_connection::handle_read(const boost::system::error_code& error,
         if (command == "update_since_last_update") {
             auto last_update = root.get<time_t>("last_update");
             update_since_last_update(
-                last_update,
-                boost::bind(&HTTP_connection::serialize_updated_pixels,
+                    last_update,
+                    boost::bind(&HTTP_connection_impl::serialize_updated_pixels,
                             shared_from_this(),
                             boost::placeholders::_1));
         }
@@ -75,15 +117,15 @@ void HTTP_connection::handle_read(const boost::system::error_code& error,
             color = pixel_tree.get<unsigned short>("color");
 
             paint_pixel(id, color,
-                        boost::bind(&HTTP_connection::serialize_painted_pixel,
-                                    shared_from_this(),
-                                    boost::placeholders::_1,
-                                    boost::placeholders::_2));
+                    boost::bind(&HTTP_connection_impl::serialize_painted_pixel,
+                            shared_from_this(),
+                            boost::placeholders::_1,
+                            boost::placeholders::_2));
         }
         else if (command == "get_field") { // TODO: список команд? map?
-            get_field(boost::bind(&HTTP_connection::serialize_all_field,
-                                  shared_from_this(),
-                                  boost::placeholders::_1));
+            get_field(boost::bind(&HTTP_connection_impl::serialize_all_field,
+                    shared_from_this(),
+                    boost::placeholders::_1));
         }
         else
             throw std::invalid_argument("Wrong command got.\n");
@@ -101,7 +143,7 @@ void HTTP_connection::handle_read(const boost::system::error_code& error,
     }
 }
 
-void HTTP_connection::handle_write (const boost::system::error_code& error) {
+void HTTP_connection_impl::handle_write (const boost::system::error_code& error) {
     if (error) {
         write_log(error.message());
         return;
@@ -114,13 +156,13 @@ void HTTP_connection::handle_write (const boost::system::error_code& error) {
 /// Connection: close
 ///
 /// { message }
-void HTTP_connection::send_response(std::string message,
-                                    boost::beast::http::status code) {
+void HTTP_connection_impl::send_response(std::string message,
+                                         boost::beast::http::status code) {
     response.version(request.version());
     response.result(code);
     if (code == boost::beast::http::status::ok)
         response.set(boost::beast::http::field::content_type,
-                     "application/json");
+                "application/json");
     response.content_length(message.length());
     response.set(boost::beast::http::field::connection, "close");
     response.body() = message;
@@ -128,12 +170,12 @@ void HTTP_connection::send_response(std::string message,
     boost::beast::http::async_write(
             socket,
             response,
-            boost::bind(&HTTP_connection::handle_write,
-                        shared_from_this(),
-                        boost::asio::placeholders::error));
+            boost::bind(&HTTP_connection_impl::handle_write,
+                    shared_from_this(),
+                    boost::asio::placeholders::error));
 }
 
-void HTTP_connection::serialize_updated_pixels(
+void HTTP_connection_impl::serialize_updated_pixels(
         const std::vector<const PixelServer*>& updated_pixels) {
     std::stringstream ss;                       //
     boost::property_tree::ptree root;           // to serializer class?
@@ -152,8 +194,8 @@ void HTTP_connection::serialize_updated_pixels(
     send_response(ss.str());
 }
 
-void HTTP_connection::serialize_painted_pixel(const PixelServer& pixel,
-                                              bool success) {
+void HTTP_connection_impl::serialize_painted_pixel(const PixelServer& pixel,
+                                                   bool success) {
     std::stringstream ss;
     boost::property_tree::ptree root;
 
@@ -176,7 +218,7 @@ void HTTP_connection::serialize_painted_pixel(const PixelServer& pixel,
     send_response(ss.str());
 }
 
-void HTTP_connection::serialize_all_field(
+void HTTP_connection_impl::serialize_all_field(
         const std::vector<const PixelServer*>& field) {
     std::stringstream ss;
     boost::property_tree::ptree root;
@@ -197,3 +239,37 @@ void HTTP_connection::serialize_all_field(
     boost::property_tree::write_json(ss, root);
     send_response(ss.str());
 }
+
+
+HTTP_connection::HTTP_connection(boost::asio::io_context& io_context) {
+    p = new HTTP_connection_impl(boost::asio::io_context& io_context);
+}
+
+HTTP_connection::~HTTP_connection() {
+    delete p;
+}
+
+void HTTP_connection::read_request() {
+    p->read_request();
+}
+
+boost::asio::ip::tcp::socket& HTTP_connection::get_socket() {
+    return p->get_socket();
+}
+
+void HTTP_connection::serialize_updated_pixels(
+        const std::vector<const PixelServer*>& updated_pixels) {
+    p->serialize_updated_pixels(updated_pixels);
+}
+
+void HTTP_connection::serialize_painted_pixel(const PixelServer& pixel,
+                                              bool success) {
+    p->serialize_painted_pixel(pixel, success);
+}
+
+void HTTP_connection::serialize_all_field(
+        const std::vector<const PixelServer*>& field) {
+    p->serialize_all_field(field);
+}
+
+
